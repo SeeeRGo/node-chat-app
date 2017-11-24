@@ -21,6 +21,24 @@ io.on('connection', (socket) => {
 
 	socket.on('createMessage', (newMessage) =>{
 		console.log('Message', newMessage)
+		socket.emit('newMessage', {
+			from: 'Admin',
+			text: 'Welcome to the chat app'
+		})
+		socket.broadcast.emit('newMessage', {
+			from: 'Admin',
+			text: `${newMessage.from} joined`
+		})
+		io.emit('newMessage', {
+			from: newMessage.from,
+			text: newMessage.text,
+			createdAt: new Date().getTime()
+		})
+		// socket.broadcast.emit('newMessage', {
+		// 	from: newMessage.from,
+		// 	text: newMessage.text,
+		// 	createdAt: new Date().getTime()
+		// })
 	})
 
 	socket.emit('newMessage', {
