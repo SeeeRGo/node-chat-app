@@ -3,6 +3,8 @@ const http = require('http')
 const express = require('express')
 const socketIO = require('socket.io')
 
+var {generateMessage} = require('./utils/message')
+
 const port = process.env.PORT || 3000;
 const publicPath = path.join(__dirname, '../public')
 
@@ -14,26 +16,16 @@ app.use(express.static(publicPath))
 
 io.on('connection', (socket) => {
 	console.log('New user connected')
-
+	socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'))
+		socket.broadcast.emit('newMessage', generateMessage('Admin', `New user joined`))
 	socket.on('disconnect', () => {
 		console.log('Client disconnected');
 	});
 
 	socket.on('createMessage', (newMessage) =>{
 		console.log('Message', newMessage)
-		socket.emit('newMessage', {
-			from: 'Admin',
-			text: 'Welcome to the chat app'
-		})
-		socket.broadcast.emit('newMessage', {
-			from: 'Admin',
-			text: `${newMessage.from} joined`
-		})
-		io.emit('newMessage', {
-			from: newMessage.from,
-			text: newMessage.text,
-			createdAt: new Date().getTime()
-		})
+
+		io.emit('newMessage', generateMessage(newMessage.from, newMessage.text))
 		// socket.broadcast.emit('newMessage', {
 		// 	from: newMessage.from,
 		// 	text: newMessage.text,
@@ -41,11 +33,11 @@ io.on('connection', (socket) => {
 		// })
 	})
 
-	socket.emit('newMessage', {
-		from: 'mike',
-		text: 'Some text',
-		createdAt: 1234
-	})
+	// socket.emit('newMessage', {
+	// 	from: 'mike',
+	// 	text: 'Some text',
+	// 	createdAt: 1234
+	// })
 })
 
 server.listen(port, () => {
